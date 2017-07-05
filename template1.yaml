@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  dbusername:
+    Type: String
+  dbpassword:
+    Type: String
+    NoEcho: true
+  subnet1:
+    Type: AWS::EC2::Subnet::Id
+  subnet2:
+    Type: AWS::EC2::Subnet::Id
+Resources:
+    DBSubnetGroup: 
+        Type: "AWS::RDS::DBSubnetGroup"
+        Properties: 
+          DBSubnetGroupDescription: "Subnet group"
+          SubnetIds:
+            - !Ref subnet1
+            - !Ref subnet2
+    RDSCluster:
+      Type: AWS::RDS::DBCluster
+      Properties:
+        MasterUsername: !Ref dbusername
+        MasterUserPassword: !Ref dbpassword
+        Engine: aurora
+        DBSubnetGroupName:
+          Ref: DBSubnetGroup
+        DBClusterParameterGroupName:
+          Ref: RDSDBClusterParameterGroup
+    RDSDBInstance1:
+      Type: AWS::RDS::DBInstance
+      Properties:
+        DBSubnetGroupName:
+          Ref: DBSubnetGroup
+        Engine: aurora
+        DBClusterIdentifier:
+          Ref: RDSCluster
+        PubliclyAccessible: true
+        DBInstanceClass: db.r3.xlarge
+    RDSDBInstance2:
+      Type: AWS::RDS::DBInstance
+      Properties:
+        DBSubnetGroupName:
+          Ref: DBSubnetGroup
+        Engine: aurora
+        DBClusterIdentifier:
+          Ref: RDSCluster
+        PubliclyAccessible: true
+        DBInstanceClass: db.r3.xlarge
+    RDSDBClusterParameterGroup:
+      Type: AWS::RDS::DBClusterParameterGroup
+      Properties:
+        Description: "Parameter group"
+        Family: aurora5.6
+        Parameters:
+          time_zone: US/Eastern
